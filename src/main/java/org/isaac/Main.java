@@ -7,6 +7,7 @@ public class Main {
     public static void main(String[] args) {
         CheckVerCode checkVerCode = new CheckVerCode();
 
+
         int exitCode = new CommandLine(checkVerCode).execute(args);
 
         if (exitCode == 1)
