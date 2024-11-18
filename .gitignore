@@ -6,7 +6,6 @@ target/
 ### Generated Files By Program ###
 app.json
 
-
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
