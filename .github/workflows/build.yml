@@ -24,15 +24,23 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Create Tag
-        id: create_tag
+      - name: Check if Tag Exists
+        id: tag_exists
         run: |
           if git rev-parse "refs/tags/${{ github.event.inputs.tag }}" >/dev/null 2>&1; then
-            echo "Tag ${{ github.event.inputs.tag }} already exists. Skipping tag creation."
+            echo "Tag ${{ github.event.inputs.tag }} already exists."
+            echo "tag_exists=true" >> $GITHUB_ENV
           else
-            git tag ${{ github.event.inputs.tag }}
-            git push origin ${{ github.event.inputs.tag }}
+            echo "Tag ${{ github.event.inputs.tag }} does not exist."
+            echo "tag_exists=false" >> $GITHUB_ENV
           fi
+
+      - name: Create Tag
+        id: create_tag
+        if: env.tag_exists == 'false'
+        run: |
+          git tag ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }}
 
       - name: Generate changelog
         id: changelog
