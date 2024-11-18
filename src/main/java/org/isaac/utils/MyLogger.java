@@ -1,4 +1,4 @@
-package org.isaac;
+package org.isaac.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
