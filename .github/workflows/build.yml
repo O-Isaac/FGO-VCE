@@ -17,14 +17,12 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
       - name: Build with Maven
         run: mvn clean package
       - name: Generate changelog
         id: changelog
         uses: metcalfc/changelog-generator@v4.3.1
         with:
-          base-ref: ${{ github.event.inputs.releaseversion }}
           myToken: ${{ secrets.PERSONAL_TOKEN }}
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -33,7 +31,5 @@ jobs:
         with:
           name: ${{ github.event.inputs.releaseversion }}
           tag_name: ${{ github.event.inputs.releaseversion }}
-          body: |
-            # Release Changes
-            ${{ steps.changelog.outputs.changelog }}
+          body: ${{ steps.changelog.outputs.changelog }}
           files: target/*.jar
