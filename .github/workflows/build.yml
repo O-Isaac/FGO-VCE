@@ -30,12 +30,9 @@ jobs:
           git tag ${{ github.event.inputs.tag }}
           git push origin ${{ github.event.inputs.tag }}
 
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.3.1
-        with:
-          myToken: ${{ secrets.PERSONAL_TOKEN }}
-          base-ref: ${{ github.event.inputs.tag }}
+      - name: changelog-ci
+        uses: saadmk11/changelog-ci@v1.1.2
+        id: changelog-ci
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -43,5 +40,5 @@ jobs:
           name: Release ${{ github.event.inputs.tag }}
           tag_name: ${{ github.event.inputs.tag }}
           token: ${{ secrets.PERSONAL_TOKEN }}
-          body: ${{ steps.changelog.outputs.changelog }}
+          body: ${{ steps.changelog-ci.outputs.changelog }}
           files: target/*.jar
