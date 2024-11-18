@@ -26,6 +26,7 @@ jobs:
 
       - name: Create Tag
         id: create_tag
+        continue-on-error: true
         run: |
           git tag ${{ github.event.inputs.tag }}
           git push origin ${{ github.event.inputs.tag }}
