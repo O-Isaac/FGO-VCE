@@ -30,7 +30,6 @@ jobs:
           git tag ${{ github.event.inputs.tag }}
           git push origin ${{ github.event.inputs.tag }}
 
-
       - name: Generate changelog
         id: changelog
         uses: jaywcjlove/changelog-generator@main
@@ -39,16 +38,10 @@ jobs:
           base-ref: ${{ github.event.inputs.tag }}
 
       - name: Create Release
-        uses: jaywcjlove/create-tag-action@main
-        id: release
+        uses: softprops/action-gh-release@v2
         with:
-          version: ${{ github.event.inputs.tag }}
-          release: true
+          name: Release ${{ github.event.inputs.tag }}
+          base-ref: ${{ github.event.inputs.tag }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
           body: ${{ steps.changelog.outputs.changelog }}
-
-      - name: Release Upload Assets
-        uses: jaywcjlove/github-action-upload-assets@main
-        continue-on-error: true
-        with:
-          tag: ${{ github.event.inputs.tag }}
-          asset-path: target/*.jar
+          files: target/*.jar
