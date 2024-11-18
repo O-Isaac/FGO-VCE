@@ -1,7 +1,11 @@
 name: release-to-github
 on:
   workflow_dispatch:
-
+    inputs:
+      tag:
+        description: 'Tag to be created'
+        required: true
+        default: 'v1.0.0'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,14 +24,13 @@ jobs:
       - name: Build with Maven
         run: mvn clean package
 
-      - run: echo "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
-
       - name: Create Tag
         id: create_tag
-        uses: jaywcjlove/create-tag-action@main
-        if: env.previous_tag
-        with:
-          test: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+        run: |
+          git tag ${{ github.event.inputs.tag }}
+          git push origin ${{ github.event.inputs.tag }}
+
+      - run: echo "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
 
       - name: Generate changelog
         id: changelog
