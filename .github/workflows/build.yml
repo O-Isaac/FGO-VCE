@@ -29,6 +29,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
         with:
+          tag: ${{ github.ref }}
           name: ${{ github.event.inputs.releaseversion }}
           tag_name: ${{ github.event.inputs.releaseversion }}
           body: ${{ steps.changelog.outputs.changelog }}
