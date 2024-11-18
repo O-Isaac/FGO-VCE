@@ -1,46 +1,55 @@
 name: release-to-github
 on:
   workflow_dispatch:
-    inputs:
-      releaseversion:
-        description: 'Release version'
-        required: true
-        default: '1.0.0'
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
+
       - name: Build with Maven
         run: mvn clean package
-      - name: Create tag if it does not exist
-        run: |
-          git fetch --tags
-          if git rev-parse "$GITHUB_REF" >/dev/null 2>&1; then
-            echo "Tag ${{ github.event.inputs.releaseversion }} already exists."
-          else
-            echo "Tag ${{ github.event.inputs.releaseversion }} does not exist. Creating it now..."
-            git tag ${{ github.event.inputs.releaseversion }}
-            git push origin ${{ github.event.inputs.releaseversion }}
-          fi
+
+      - run: echo "previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo '')" >> $GITHUB_ENV
+
+      - name: Create Tag
+        id: create_tag
+        uses: jaywcjlove/create-tag-action@main
+        if: env.previous_tag
+        with:
+          test: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
       - name: Generate changelog
         id: changelog
-        uses: metcalfc/changelog-generator@v4.3.1
+        uses: jaywcjlove/changelog-generator@main
+        if: env.previous_tag
         with:
-          myToken: ${{ secrets.PERSONAL_TOKEN }}
+          token: ${{ secrets.PERSONAL_TOKEN }}
+          filter-author: (jaywcjlove|小弟调调™|dependabot|renovate\\[bot\\]|dependabot\\[bot\\]|Renovate Bot)
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        uses: jaywcjlove/create-tag-action@main
+        id: release
+        if: steps.create_tag.outputs.successful == 'true'
         with:
-          tag: ${{ github.event.inputs.releaseversion }}
-          name: ${{ github.event.inputs.releaseversion }}
-          tag_name: ${{ github.event.inputs.releaseversion }}
+          version: ${{steps.create_tag.outputs.version}}
+          release: true
           body: ${{ steps.changelog.outputs.changelog }}
-          files: target/*.jar
+
+      - name: Release Upload Assets
+        uses: jaywcjlove/github-action-upload-assets@main
+        continue-on-error: true
+        with:
+          tag: ${{ steps.release.outputs.version }}
+          asset-path: target/*.jar
