@@ -1,6 +1,5 @@
 package org.isaac;
 
-
 import org.isaac.commands.CheckVerCode;
 import picocli.CommandLine;
 
