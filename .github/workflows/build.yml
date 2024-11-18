@@ -27,8 +27,12 @@ jobs:
       - name: Create Tag
         id: create_tag
         run: |
-          git tag ${{ github.event.inputs.tag }}
-          git push origin ${{ github.event.inputs.tag }}
+          if git rev-parse "refs/tags/${{ github.event.inputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ github.event.inputs.tag }} already exists. Skipping tag creation."
+          else
+            git tag ${{ github.event.inputs.tag }}
+            git push origin ${{ github.event.inputs.tag }}
+          fi
 
       - name: Generate changelog
         id: changelog
@@ -41,7 +45,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.event.inputs.tag }}
-          base-ref: ${{ github.event.inputs.tag }}
+          tag_name: ${{ github.event.inputs.tag }}
           token: ${{ secrets.PERSONAL_TOKEN }}
           body: ${{ steps.changelog.outputs.changelog }}
           files: target/*.jar
