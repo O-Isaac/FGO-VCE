@@ -24,6 +24,7 @@ jobs:
         id: changelog
         uses: metcalfc/changelog-generator@v4.3.1
         with:
+          base-ref: ${{ github.event.inputs.releaseversion }}
           myToken: ${{ secrets.PERSONAL_TOKEN }}
       - name: Create Release
         uses: softprops/action-gh-release@v2
