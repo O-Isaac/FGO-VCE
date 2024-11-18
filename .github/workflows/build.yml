@@ -33,6 +33,8 @@ jobs:
       - name: changelog-ci
         uses: saadmk11/changelog-ci@v1.1.2
         id: changelog-ci
+        with:
+          release_version: ${{ github.event.inputs.tag }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
