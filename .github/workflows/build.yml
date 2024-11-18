@@ -1,47 +1,21 @@
-name: release-to-github
+name: 'CI'
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to be created'
-        required: true
-        default: 'v1.0.0'
+  push:
+    tags:
+      - '*'
+
 jobs:
-  build:
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Build with Maven
-        run: mvn clean package
-
-      - name: Create Tag
-        id: create_tag
-        continue-on-error: true
-        run: |
-          git tag ${{ github.event.inputs.tag }}
-          git push origin ${{ github.event.inputs.tag }}
-
-      - name: changelog-ci
-        uses: saadmk11/changelog-ci@v1.1.2
-        id: changelog-ci
-        with:
-          release_version: ${{ github.event.inputs.tag }}
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
-          name: Release ${{ github.event.inputs.tag }}
-          tag_name: ${{ github.event.inputs.tag }}
-          token: ${{ secrets.PERSONAL_TOKEN }}
-          body: ${{ steps.changelog-ci.outputs.changelog }}
-          files: target/*.jar
+          body: ${{steps.github_release.outputs.changelog}}
