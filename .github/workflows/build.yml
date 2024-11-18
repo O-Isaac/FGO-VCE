@@ -44,9 +44,9 @@ jobs:
 
       - name: Generate changelog
         id: changelog
-        uses: jaywcjlove/changelog-generator@main
+        uses: metcalfc/changelog-generator@v4.3.1
         with:
-          token: ${{ secrets.PERSONAL_TOKEN }}
+          myToken: ${{ secrets.PERSONAL_TOKEN }}
           base-ref: ${{ github.event.inputs.tag }}
 
       - name: Create Release
