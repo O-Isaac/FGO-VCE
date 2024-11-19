@@ -25,11 +25,14 @@ public class CheckVerCode implements Callable<Integer> {
     @Option(names = { "-av", "--appversion" }, description = "What version in this verCode.")
     String appVer;
 
-    private static MyLogger logger = new MyLogger(CheckVerCode.class);
+    @Option(names = { "-o", "--output"}, description = "Specify the output where is the file. (include name & ext)")
+    String output;
+
+    private static final MyLogger logger = new MyLogger(CheckVerCode.class);
 
     @Override
     public Integer call() throws Exception {
-        if (stringLiteralPath == null) return 1;
+        if (stringLiteralPath == null || appVer == null || output == null) return 1;
 
         logger.info("Getting file from " + stringLiteralPath);
         File stringLiteralFile = new File(stringLiteralPath);
@@ -43,7 +46,7 @@ public class CheckVerCode implements Callable<Integer> {
         AppEntity appEntity = new AppEntity(comparator.getVerCode(), appVer);
 
         logger.info("Writing verCode (" + appEntity.getVerCode() + ") of version (" + appEntity.getAppVer() + ")");
-        mapper.writeValue(new File("app.json"), appEntity);
+        mapper.writeValue(new File(output), appEntity);
 
         logger.info("Done!");
         return 0;
