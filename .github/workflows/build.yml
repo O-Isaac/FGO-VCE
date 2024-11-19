@@ -27,6 +27,7 @@ jobs:
         uses: requarks/changelog-action@v1
         continue-on-error: true
         with:
+          excludeTypes:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
 
