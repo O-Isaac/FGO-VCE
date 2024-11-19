@@ -28,6 +28,7 @@ jobs:
         continue-on-error: true
         with:
           excludeTypes:
+          writeToFile: false
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
 
