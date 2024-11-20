@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.isaac.entities.AppEntity;
-import org.isaac.utils.Comparator;
 import org.isaac.utils.MyLogger;
+import org.isaac.utils.StringLiteralExtractor;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -19,8 +20,8 @@ import java.util.concurrent.Callable;
         description = "Compare two stringliteral.json and return updated verCode"
 )
 public class CheckVerCode implements Callable<Integer> {
-    @Option(names = { "-s", "--stringliteral" }, description = "Source stringliteral old file.")
-    String stringLiteralPath;
+    @Option(names = { "-g", "--global-metadata" }, description = "Path for file global-metadata.dat")
+    String globalMetadataPath;
 
     @Option(names = { "-av", "--appversion" }, description = "What version in this verCode.")
     String appVer;
@@ -32,18 +33,15 @@ public class CheckVerCode implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        if (stringLiteralPath == null || appVer == null || output == null) return 1;
+        if (globalMetadataPath == null || appVer == null || output == null) return 1;
 
-        logger.info("Getting file from " + stringLiteralPath);
-        File stringLiteralFile = new File(stringLiteralPath);
         ObjectMapper mapper = new ObjectMapper();
 
-        logger.info("Reading and mapping the file...");
-        JsonNode stringLiteralNode = mapper.readTree(stringLiteralFile);
-
-        logger.info("Getting VerCode from map...");
-        Comparator comparator = new Comparator(stringLiteralNode);
-        AppEntity appEntity = new AppEntity(comparator.getVerCode(), appVer);
+        logger.info("Getting global-metadata.dat " + globalMetadataPath);
+        StringLiteralExtractor literalExtractor = new StringLiteralExtractor(globalMetadataPath).extract();
+        
+        logger.info("Getting VerCode...");
+        AppEntity appEntity = new AppEntity(literalExtractor.getVerCodeString(), appVer);
 
         logger.info("Writing verCode (" + appEntity.getVerCode() + ") of version (" + appEntity.getAppVer() + ")");
         mapper.writeValue(new File(output), appEntity);
