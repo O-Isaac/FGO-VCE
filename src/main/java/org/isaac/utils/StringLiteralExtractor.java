@@ -10,6 +10,8 @@ package org.isaac.utils;
  * @acknowledgement jozsefsallai - Original creator (python)
  * @author O-Isaac
  */
+import org.isaac.commands.CheckVerCode;
+
 import java.io.*;
 import java.util.*;
 
@@ -23,6 +25,8 @@ public class StringLiteralExtractor {
     private static final int LOOKUP_TABLE_SIZE_DEFINITION_OFFSET = 12;
     private static final int STRINGLITERAL_DATA_DEFINITION_OFFSET = 16;
     private static final int STRINGLITERAL_DATA_SIZE_DEFINITION_OFFSET = 20;
+
+    private static final MyLogger LOGGER = new MyLogger(StringLiteralExtractor.class);
 
     public StringLiteralExtractor(String filepath) {
         this.filepath = filepath;
@@ -49,6 +53,7 @@ public class StringLiteralExtractor {
 
         for (String str : stringLiterals) {
             if (!isHashSha256(str)) continue;
+            LOGGER.info("Found verCode hash (sha256): " + str + " ");
             verCode = str;
         }
 
