@@ -45,6 +45,14 @@ public class CheckVerCode implements Callable<Integer> {
             ""
         );
 
+        if (apkPath == null) {
+          //TODO:Make zipExtractor múltiple apk
+          apkPath = xapkExtractor.extract(
+           "com.aniplex.fategrandorder.en.apk",
+           ""
+          );
+        }
+
         ZipExtractor globalMetadataExtrator = new ZipExtractor(apkPath.toString());
         Path globalMetadaPath = globalMetadataExtrator.extract(
             "assets/bin/Data/Managed/Metadata/global-metadata.dat",
