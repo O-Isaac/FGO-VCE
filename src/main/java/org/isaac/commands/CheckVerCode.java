@@ -12,7 +12,12 @@ import picocli.CommandLine.Option;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import org.isaac.consumers.GlobalMetadataConsumer;
 
 @Command(
         name = "fgo-vce",
@@ -31,39 +36,25 @@ public class CheckVerCode implements Callable<Integer> {
     String output;
 
     private static final MyLogger LOGGER = new MyLogger(CheckVerCode.class);
-
+    
+    private List<String> apks = Arrays.asList("com.aniplex.fategrandorder.apk", "com.aniplex.fategrandorder.en.apk");
+    
     @Override
     public Integer call() throws Exception {
         if (xapkPath == null || appVer == null || output == null) return 1;
 
-        ObjectMapper mapper = new ObjectMapper();
-
         LOGGER.info("Getting global-metadata.dat from apk " + xapkPath);
+
         ZipExtractor xapkExtractor = new ZipExtractor(xapkPath);
-        Path apkPath = xapkExtractor.extract(
-            "com.aniplex.fategrandorder.apk",
-            ""
-        );
+        
+        Optional<Path> apkPath = xapkExtractor.extract(apks, "");
 
-        if (apkPath == null) {
-          //TODO:Make zipExtractor múltiple apk
-          apkPath = xapkExtractor.extract(
-           "com.aniplex.fategrandorder.en.apk",
-           ""
-          );
-        }
-
-        ZipExtractor globalMetadataExtrator = new ZipExtractor(apkPath.toString());
-        Path globalMetadaPath = globalMetadataExtrator.extract(
-            "assets/bin/Data/Managed/Metadata/global-metadata.dat",
-            ""
-        );
-
-        StringLiteralExtractor literalExtractor = new StringLiteralExtractor(globalMetadaPath.toString()).extract();
-        AppEntity appEntity = new AppEntity(literalExtractor.getVerCodeString(), appVer);
-
-        mapper.writeValue(new File(output), appEntity);
-        LOGGER.info("Writed file on " + output + " completed!");
+        apkPath.ifPresentOrElse(new GlobalMetadataConsumer(appVer, output), () -> {
+            LOGGER.info("Apk not found!");
+        });
+        
         return 0;
     }
+    
+    
 }
