@@ -1,6 +1,5 @@
 package org.isaac.entities;
 
-import org.isaac.commands.CheckVerCode;
 import org.isaac.utils.MyLogger;
 
 public class AppEntity {
